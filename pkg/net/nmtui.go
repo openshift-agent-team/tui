@@ -9,7 +9,7 @@ import (
 	"github.com/rivo/tview"
 )
 
-func NMTUIRunner(app *tview.Application, pages *tview.Pages) func() {
+func NMTUIRunner(app *tview.Application, pages *tview.Pages, treeView *tview.TreeView) func() {
 	return func() {
 		app.Suspend(func() {
 			cmd := exec.Command("nmtui")
@@ -33,7 +33,18 @@ func NMTUIRunner(app *tview.Application, pages *tview.Pages) func() {
 		}
 
 		//netStatePage, err := modalNetStateJSONPage(&netState, pages)
-		netStatePage, err := ModalTreeView(netState, pages)
-		pages.AddPage("netstate", netStatePage, true, true)
+		if treeView == nil {
+			netStatePage, err := ModalTreeView(netState, pages)
+			if err != nil {
+				panic(err)
+			}
+			pages.AddPage("netstate", netStatePage, true, true)
+		} else {
+			updatedTreeView, err := TreeView(netState, pages)
+			if err != nil {
+				panic(err)
+			}
+			treeView.SetRoot(updatedTreeView.GetRoot())
+		}
 	}
 }

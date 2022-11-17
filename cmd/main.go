@@ -43,6 +43,7 @@ func doneView(app *tview.Application, pages *tview.Pages) func(int, string) {
 			}
 
 			var netState tuiNet.NetState
+
 			if err := json.Unmarshal([]byte(state), &netState); err != nil {
 				panic(err)
 			}
@@ -58,19 +59,9 @@ func node0Handler(app *tview.Application, pages *tview.Pages) func(int, string) 
 	return func(buttonIndex int, buttonLabel string) {
 		if buttonLabel == YES {
 			// TODO: Print addressing, offer to configure, done
-			nm := nmstate.New()
-			jsonNetState, err := nm.RetrieveNetState()
-			if err != nil {
-				panic(err)
-			}
 
-			var netState tuiNet.NetState
-			if err := json.Unmarshal([]byte(jsonNetState), &netState); err != nil {
-				panic(err)
-			}
-
-			netStatePage, err := tuiNet.ModalTreeView(netState, pages)
-			pages.AddPage("netstate", netStatePage, true, true)
+			node0Form := forms.Node0Form(app, pages)
+			pages.AddPage("node0Form", node0Form, true, true)
 		} else {
 			regNodeForm := forms.RegNodeModalForm(app, pages)
 			pages.AddPage("regNodeConfig", regNodeForm, true, true)
@@ -90,7 +81,7 @@ func main() {
 		SetText("Do you wish for this node to be the one that runs the installation service (Only one node may perform this function)?").
 		SetTextColor(tcell.ColorBlack).
 		SetDoneFunc(node0Handler(app, pages)).
-		SetBackgroundColor(newt.ColorGrey).
+		SetBackgroundColor(newt.ColorGray).
 		SetButtonTextColor(tcell.ColorBlack).
 		SetButtonBackgroundColor(tcell.ColorDarkGray)
 

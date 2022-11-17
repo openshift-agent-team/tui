@@ -54,12 +54,6 @@ func ModalTreeView(netState NetState, pages *tview.Pages) (tview.Primitive, erro
 	if err != nil {
 		return nil, err
 	}
-	treeView.SetTitle("Network Status").
-		SetBackgroundColor(newt.ColorGrey).
-		SetBorder(true).
-		SetBorderColor(tcell.ColorBlack).
-		SetTitleColor(tcell.ColorBlack)
-
 	width := 40
 	height := 40
 	return tview.NewFlex().
@@ -84,6 +78,13 @@ func TreeView(netState NetState, pages *tview.Pages) (*tview.TreeView, error) {
 			pageName, _ := pages.GetFrontPage()
 			pages.RemovePage(pageName)
 		})
+
+	tree.SetTitle("Network Status").
+		SetBackgroundColor(newt.ColorGray).
+		SetBorder(true).
+		SetBorderColor(tcell.ColorBlack).
+		SetTitleColor(tcell.ColorBlack)
+
 	tree.SetInputCapture(
 		func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Rune() == 'q' {

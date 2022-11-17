@@ -16,7 +16,7 @@ func modalNetStateJSONPage(ns *NetState, pages *tview.Pages) (*tview.Modal, erro
 	modal := tview.NewModal().
 		SetText(fmt.Sprintf("%+v", *ns)).
 		SetTextColor(tcell.ColorBlack).
-		SetBackgroundColor(newt.ColorGrey)
+		SetBackgroundColor(newt.ColorGray)
 	modal.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Rune() == 'q' || event.Key() == tcell.KeyESC {
 			pages.HidePage("netstate")

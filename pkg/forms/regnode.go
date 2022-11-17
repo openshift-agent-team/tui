@@ -20,7 +20,7 @@ const (
 func RegNodeModalForm(app *tview.Application, pages *tview.Pages) tview.Primitive {
 	statusView := tview.NewTextView()
 
-	statusView.SetBackgroundColor(newt.ColorGrey).
+	statusView.SetBackgroundColor(newt.ColorGray).
 		SetBorder(true).
 		SetBorderColor(tcell.ColorBlack).
 		SetTitle("Status").
@@ -60,7 +60,7 @@ func RegNodeModalForm(app *tview.Application, pages *tview.Pages) tview.Primitiv
 				app.Draw()
 			}()
 		}). // TODO: Make the connectivity check screen
-		AddButton(NETCONFIGURE, tuiNet.NMTUIRunner(app, pages)).
+		AddButton(NETCONFIGURE, tuiNet.NMTUIRunner(app, pages, nil)).
 		AddButton(DONE, func() {
 			if goodConnectivity {
 				app.Stop()
@@ -72,7 +72,7 @@ func RegNodeModalForm(app *tview.Application, pages *tview.Pages) tview.Primitiv
 		SetBorder(true).
 		SetTitle("Non installation orchestrating node configuration").
 		SetTitleColor(tcell.ColorBlack).
-		SetBackgroundColor(newt.ColorGrey).
+		SetBackgroundColor(newt.ColorGray).
 		SetBorderColor(tcell.ColorBlack)
 
 	/*ipField.SetChangedFunc(func(text string) {

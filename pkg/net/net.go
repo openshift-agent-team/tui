@@ -51,11 +51,14 @@ func (ipc *IPConfig) UnmarshalJSON(data []byte) error {
 
 	ipc.Enabled = tempIpConfig.Enabled
 	for _, address := range tempIpConfig.Addresses {
-		_, net, err := net.ParseCIDR(fmt.Sprintf("%s/%d", address.IP, address.Prefixlen))
+		ip, netCIDR, err := net.ParseCIDR(fmt.Sprintf("%s/%d", address.IP, address.Prefixlen))
 		if err != nil {
 			return err
 		}
-		ipc.Addresses = append(ipc.Addresses, *net)
+		ipc.Addresses = append(ipc.Addresses, net.IPNet{
+			IP:   ip,
+			Mask: netCIDR.Mask,
+		})
 	}
 	return nil
 }

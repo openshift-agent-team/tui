@@ -76,7 +76,7 @@ func TreeView(netState NetState, pages *tview.Pages) (*tview.TreeView, error) {
 		return nil, fmt.Errorf("Can't make a NetState treeView page for nil pages")
 	}
 
-	root := tview.NewTreeNode(fmt.Sprintf("%s", netState.Hostname.Running)).SetColor(tcell.ColorBlack)
+	root := tview.NewTreeNode(fmt.Sprintf("[black::b]%s", netState.Hostname.Running))
 	tree := tview.NewTreeView().
 		SetRoot(root).
 		SetCurrentNode(root).SetDoneFunc(

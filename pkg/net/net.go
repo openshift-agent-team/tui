@@ -15,8 +15,8 @@ type DNSResolver struct {
 }
 
 type DNSConfig struct {
-	Servers []string `json:"server,omitempty"`
-	Searchs []string `json:"search,omitempty"`
+	Servers       []string `json:"server,omitempty"`
+	SearchDomains []string `json:"search,omitempty"`
 }
 
 type RoutesRC struct {

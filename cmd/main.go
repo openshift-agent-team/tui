@@ -2,35 +2,24 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"os/exec"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/nmstate/nmstate/rust/src/go/nmstate/v2"
+	"github.com/openshift-agent-team/tui/pkg/forms"
 	tuiNet "github.com/openshift-agent-team/tui/pkg/net"
 	"github.com/openshift-agent-team/tui/pkg/newt"
 	"github.com/rivo/tview"
+	//"golang.org/x/exp/slices"
 )
 
-func modalNetStateJSONPage(ns *tuiNet.NetState, pages *tview.Pages) (*tview.Modal, error) {
-	if pages == nil {
-		return nil, fmt.Errorf("Can't add modal NetState page to nil pages")
-	}
-
-	modal := tview.NewModal().
-		SetText(fmt.Sprintf("%+v", *ns)).
-		SetTextColor(tcell.ColorBlack).
-		SetBackgroundColor(newt.ColorGrey)
-	modal.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Rune() == 'q' || event.Key() == tcell.KeyESC {
-			pages.HidePage("netstate")
-		}
-		return event
-	})
-
-	return modal, nil
-}
+const (
+	QUIT      string = "Quit"
+	CONFIGURE string = "Configure"
+	YES       string = "Yes"
+	NO        string = "No"
+)
 
 func doneView(app *tview.Application, pages *tview.Pages) func(int, string) {
 	return func(buttonIndex int, buttonLabel string) {
@@ -53,14 +42,38 @@ func doneView(app *tview.Application, pages *tview.Pages) func(int, string) {
 				panic(err)
 			}
 
-			var filteredNetState tuiNet.NetState
-			if err := json.Unmarshal([]byte(state), &filteredNetState); err != nil {
+			var netState tuiNet.NetState
+			if err := json.Unmarshal([]byte(state), &netState); err != nil {
 				panic(err)
 			}
 
-			//netStatePage, err := modalNetStateJSONPage(&filteredNetState, pages)
-			netStatePage, err := tuiNet.TreeView(filteredNetState, pages)
+			//netStatePage, err := modalNetStateJSONPage(&netState, pages)
+			netStatePage, err := tuiNet.ModalTreeView(netState, pages)
 			pages.AddPage("netstate", netStatePage, true, true)
+		}
+	}
+}
+
+func node0Handler(app *tview.Application, pages *tview.Pages) func(int, string) {
+	return func(buttonIndex int, buttonLabel string) {
+		if buttonLabel == YES {
+			// TODO: Print addressing, offer to configure, done
+			nm := nmstate.New()
+			jsonNetState, err := nm.RetrieveNetState()
+			if err != nil {
+				panic(err)
+			}
+
+			var netState tuiNet.NetState
+			if err := json.Unmarshal([]byte(jsonNetState), &netState); err != nil {
+				panic(err)
+			}
+
+			netStatePage, err := tuiNet.ModalTreeView(netState, pages)
+			pages.AddPage("netstate", netStatePage, true, true)
+		} else {
+			regNodeForm := forms.RegNodeModalForm(app, pages)
+			pages.AddPage("regNodeConfig", regNodeForm, true, true)
 		}
 	}
 }
@@ -73,22 +86,19 @@ func main() {
 		SetBorder(false).
 		SetBackgroundColor(newt.ColorBlue)
 
-	shouldConfigure := tview.NewModal().
+	node0 := tview.NewModal().
 		SetText("Do you wish for this node to be the one that runs the installation service (Only one node may perform this function)?").
 		SetTextColor(tcell.ColorBlack).
-		AddButtons([]string{"Quit", "Configure"}).
-		SetDoneFunc(doneView(app, pages)).
-		SetBackgroundColor(newt.ColorGrey)
+		SetDoneFunc(node0Handler(app, pages)).
+		SetBackgroundColor(newt.ColorGrey).
+		SetButtonTextColor(tcell.ColorBlack).
+		SetButtonBackgroundColor(tcell.ColorDarkGray)
 
-	shouldConfigure.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Rune() == 'q' || event.Key() == tcell.KeyESC {
-			app.Stop()
-		}
-		return event
-	})
+	node0Buttons := []string{YES, NO}
+	node0.AddButtons(node0Buttons)
 
 	pages.AddPage("background", background, true, true).
-		AddPage("ShouldConfigure", shouldConfigure, true, true)
+		AddPage("Node0", node0, true, true)
 
 	if err := app.SetRoot(pages, true).Run(); err != nil {
 		panic(err)
